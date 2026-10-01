@@ -131,20 +131,22 @@ Modul Python [`solver.py`](file:///d:/Smartcare-Logistics/src/smartcare_logistic
 ```text
 SmartCare-Logistics/
 ├── .venv/                  # Virtual Environment (Managed by Astral uv)
+SmartCare-Logistics/
 ├── src/
 │   ├── smartcare_logistics/
 │   │   ├── __init__.py
-│   │   ├── search.py        # Algoritma UCS, A*, dan heuristik
-│   │   └── solver.py        # Mesin Inferensi CSP (AC-3, Backtracking MRV/LCV/FC)
-│   └── main.py              # Skrip simulasi utama Milestone 1 & Milestone 2
+│   │   ├── search.py        # M1: Algoritma UCS, A*, dan heuristik
+│   │   └── solver.py        # M2: Mesin Inferensi CSP (AC-3, Backtracking MRV/LCV/FC)
+│   └── main.py              # M1 & M2: Skrip simulasi utama
 ├── tests/
-│   ├── test_search.py       # Pengujian otomatis State-Space Search (pytest)
-│   └── test_solver.py       # Pengujian otomatis CSP Solver (pytest)
+│   ├── test_search.py       # M1: Pengujian State-Space Search
+│   └── test_solver.py       # M2: Pengujian CSP Solver
 ├── .gitignore
 ├── .python-version
 ├── LICENSE                 # Lisensi MIT
-├── pyproject.toml          # Dependensi Astral uv
-├── README.md               # Dokumentasi Laporan Milestone 1 & 2
+├── pyproject.toml          # Konfigurasi dependensi Astral uv
+├── README.md               # Dokumentasi Milestone 1 & Milestone 2
+└── uv.lock         # Dokumentasi Laporan Milestone 1 & 2
 └── uv.lock
 ```
 
