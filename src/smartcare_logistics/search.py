@@ -1,30 +1,88 @@
 import heapq
+from collections import deque
 from typing import Dict, List, Tuple, Optional
 
-# Definition of the State-Space Graph for Medical Emergency Distribution
-# Nodes: Health Facilities / Supply Nodes
-# Edges: Adjacency list with travel time in minutes as cost
+# Definition of the State-Space Graph for Medical Supply Distribution in Toba Region
+# Nodes: Health Facilities & Distribution Hubs (S0 to S7)
+# Edges: Undirected adjacency list with real-world travel distance in kilometers (km)
 GRAPH: Dict[str, Dict[str, float]] = {
-    "PMI_Pusat": {"RS_A": 10.0, "RS_B": 5.0},
-    "RS_A": {"RS_C": 12.0, "RS_D": 8.0},
-    "RS_B": {"RS_C": 18.0, "RS_E": 15.0},
-    "RS_C": {"RS_Darurat_UAS": 10.0},
-    "RS_D": {"RS_Darurat_UAS": 14.0},
-    "RS_E": {"RS_Darurat_UAS": 12.0},
-    "RS_Darurat_UAS": {}
+    "S0": {"S1": 22.00, "S2": 22.80, "S7": 52.00},
+    "S1": {"S0": 22.00},
+    "S2": {"S0": 22.80, "S3": 19.42, "S4": 28.53},
+    "S3": {"S2": 19.42},
+    "S4": {"S2": 28.53, "S5": 40.00},
+    "S5": {"S4": 40.00, "S6": 22.00},
+    "S6": {"S5": 22.00, "S7": 53.00},
+    "S7": {"S0": 52.00, "S6": 53.00}
 }
 
-# Heuristic Function h(n): Estimated travel time to RS_Darurat_UAS
-# Admissibility condition: h(n) <= h*(n) (true minimum cost to goal)
-HEURISTIC: Dict[str, float] = {
-    "PMI_Pusat": 30.0,
-    "RS_A": 20.0,
-    "RS_B": 26.0,
-    "RS_C": 9.0,
-    "RS_D": 13.0,
-    "RS_E": 11.0,
-    "RS_Darurat_UAS": 0.0
+# Location labels mapping state codes to full facility names (as shown in Image 2)
+LOCATIONS: Dict[str, str] = {
+    "S0": "S0 - Balige (titik distribusi medis)",
+    "S1": "S1 - RSUD Porsea",
+    "S2": "S2 - Siborong-Borong",
+    "S3": "S3 - RSUD Tarutung",
+    "S4": "S4 - RSUD Dolok Sanggul",
+    "S5": "S5 - Tele",
+    "S6": "S6 - RSUD dr. Hadrianus Sinaga, Pangururan",
+    "S7": "S7 - Parsoburan"
 }
+
+# Minimum edge weight in the entire graph (used for admissible heuristic formulation)
+C_MIN: float = 19.42
+
+# Default Heuristic Function h(n) for Main Goal State S6 (Pangururan)
+# h(n) = d_hop(n, S6) * C_MIN (where C_MIN = 19.42 km)
+# Proven admissible: h(n) <= h*(n) for all nodes n
+HEURISTIC_S6: Dict[str, float] = {
+    "S0": 38.84,  # min hop = 2 -> 2 * 19.42
+    "S1": 58.26,  # min hop = 3 -> 3 * 19.42
+    "S2": 58.26,  # min hop = 3 -> 3 * 19.42
+    "S3": 77.68,  # min hop = 4 -> 4 * 19.42
+    "S4": 38.84,  # min hop = 2 -> 2 * 19.42
+    "S5": 19.42,  # min hop = 1 -> 1 * 19.42
+    "S6": 0.00,   # min hop = 0 -> 0 * 19.42
+    "S7": 19.42   # min hop = 1 -> 1 * 19.42
+}
+
+
+def get_full_path_names(path: Optional[List[str]]) -> str:
+    """Helper function to format a path list into full facility names string."""
+    if not path:
+        return "Tidak Ada Rute"
+    return " -> ".join([LOCATIONS.get(node, node) for node in path])
+
+
+def compute_admissible_heuristic(
+    graph: Dict[str, Dict[str, float]], 
+    goal: str, 
+    c_min: float = C_MIN
+) -> Dict[str, float]:
+    """
+    Computes an admissible heuristic dictionary for any goal node using BFS hop distance:
+    h(n) = min_hops(n, goal) * c_min.
+    Guaranteed admissible since c_min is lower bound of edge cost in graph.
+    """
+    heuristic: Dict[str, float] = {}
+    if goal not in graph:
+        return {node: 0.0 for node in graph}
+
+    # BFS to calculate minimum hop distance from goal to all nodes
+    queue: deque = deque([(goal, 0)])
+    visited_hops: Dict[str, int] = {goal: 0}
+
+    while queue:
+        current, hops = queue.popleft()
+        for neighbor in graph.get(current, {}):
+            if neighbor not in visited_hops:
+                visited_hops[neighbor] = hops + 1
+                queue.append((neighbor, hops + 1))
+
+    for node in graph:
+        hops = visited_hops.get(node, 0)
+        heuristic[node] = round(hops * c_min, 2)
+
+    return heuristic
 
 
 def uniform_cost_search(
@@ -34,7 +92,8 @@ def uniform_cost_search(
 ) -> Tuple[Optional[List[str]], float, int]:
     """
     Uniform Cost Search (UCS) algorithm using a priority queue (heapq).
-    Returns tuple of (optimal_path, total_cost, nodes_explored).
+    Returns tuple of (optimal_path, total_cost_km, nodes_explored).
+    Goal test is performed when node is popped from queue.
     """
     if start not in graph or goal not in graph:
         return None, float("inf"), 0
@@ -66,24 +125,27 @@ def a_star_search(
     graph: Dict[str, Dict[str, float]], 
     start: str, 
     goal: str, 
-    heuristic: Dict[str, float]
+    heuristic: Optional[Dict[str, float]] = None
 ) -> Tuple[Optional[List[str]], float, int]:
     """
     A* Search algorithm using priority queue (heapq) guided by admissible heuristic.
-    Returns tuple of (optimal_path, total_cost, nodes_explored).
+    Returns tuple of (optimal_path, total_cost_km, nodes_explored).
+    Goal test is performed when node is popped from queue.
     """
     if start not in graph or goal not in graph:
         return None, float("inf"), 0
 
+    if heuristic is None:
+        heuristic = compute_admissible_heuristic(graph, goal)
+
     initial_h = heuristic.get(start, 0.0)
-    # Tuple format: (f_score, h_score, g_score, current, path)
-    # Tie-breaking by h_score prefers nodes closer to goal when f_scores are equal
-    pq: List[Tuple[float, float, float, str, List[str]]] = [(initial_h, initial_h, 0.0, start, [start])]
+    # Priority Queue tuple: (f_score, g_score, current, path)
+    pq: List[Tuple[float, float, str, List[str]]] = [(initial_h, 0.0, start, [start])]
     visited: Dict[str, float] = {}
     nodes_explored = 0
 
     while pq:
-        f_score, h_score, g_score, current, path = heapq.heappop(pq)
+        f_score, g_score, current, path = heapq.heappop(pq)
 
         if current in visited and visited[current] <= g_score:
             continue
@@ -99,6 +161,6 @@ def a_star_search(
             new_f = new_g + new_h
 
             if neighbor not in visited or new_g < visited[neighbor]:
-                heapq.heappush(pq, (new_f, new_h, new_g, neighbor, path + [neighbor]))
+                heapq.heappush(pq, (new_f, new_g, neighbor, path + [neighbor]))
 
     return None, float("inf"), nodes_explored
