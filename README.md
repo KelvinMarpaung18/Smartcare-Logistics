@@ -68,15 +68,15 @@ graph LR
 
 1. **Himpunan Variabel ($X$)**:
    Fasilitas kesehatan tujuan penerima pasokan medis darurat:
-   $$X = \{ X_{\text{S1\_Porsea}}, X_{\text{S3\_Tarutung}}, X_{\text{S4\_DolokSanggul}}, X_{\text{S6\_Pangururan}} \}$$
+   $$X = \{ X_{\text{Porsea}}, X_{\text{Tarutung}}, X_{\text{DolokSanggul}}, X_{\text{Pangururan}} \}$$
 
 2. **Himpunan Domain ($D$)**:
    Opsi armada kendaraan medis dan ambulans yang tersedia pada pusat distribusi Balige:
-   $$D = \{ \text{Ambulance\_01 (ColdChain)}, \text{Ambulance\_02 (General)}, \text{ColdChain\_Van\_A (DeepFreezer)}, \text{ColdChain\_Van\_B (Standard)} \}$$
+   $$D = \{ \text{Ambulans-01 (ColdChain)}, \text{Ambulans-02 (General)}, \text{Van-ColdChain-A}, \text{Van-ColdChain-B} \}$$
 
 3. **Himpunan Batasan ($C$)**:
    * **Unary Constraint (Arity 1)**:
-     $$X_{\text{S6\_Pangururan}} \neq \text{Ambulance\_02 (General)}$$
+     $$X_{\text{Pangururan}} \neq \text{Ambulans-02 (General)}$$
      *(Fasilitas Pangururan membutuhkan kualifikasi pendingin suhu rendah/Deep Freezer untuk kantong darah darurat).*
    * **Binary Constraint (Arity 2)**:
      $$\forall i \neq j, \quad X_i \neq X_j$$
