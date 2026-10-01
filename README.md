@@ -30,9 +30,9 @@ Sistem purwarupa berbasis **State-Space Search (UCS & A* Search)** dan **Constra
 * **Actuators**: Pemilihan *state* tujuan berikutnya, penentuan jalur distribusi, dan penyajian rekomendasi rute.
 * **Sensors**: Data lokasi (*state*), data konektivitas graf (*edges*), data bobot jarak (km), *initial state*, dan *goal state*.
 
-### 🧮 Formulasi Ruang Keadaan Matematika $(X, A, T, G, C)$
+### 🧮 Formulasi Ruang Keadaan Matematika (X, A, T, G, C)
 
-* **State Space ($X$)**:
+* **State Space (X)**:
   * `S0`: **S0 - Balige (titik distribusi medis)** *(Initial State)*
   * `S1`: **S1 - RSUD Porsea**
   * `S2`: **S2 - Siborong-Borong**
@@ -62,25 +62,35 @@ graph LR
 
 ### 📌 Problem Framing Sub-Masalah Bisnis Milestone 2
 * **Kasus Keputusan Bisnis**: **Alokasi Armada Kendaraan Medis & Ambulans Logistik Cold-Chain** (*Medical Cold-Chain Vehicle & Fleet Assignment Problem*).
-* **Latar Belakang Operasional**: Penugasan armada ambulans dan boks pendingin obat/darah darurat ke fasilitas kesehatan tujuan harus memenuhi batasan ketat (tidak boleh ada penugasan ganda pada armada yang sama dan kendaraan yang ditugaskan harus memenuhi kualifikasi pendingin suhu medis).
+* **Latar Belakang Operasional**: Penugasan armada ambulans dan kendaraan pendukung distribusi obat/darah darurat ke fasilitas kesehatan tujuan harus memenuhi batasan operasional, yaitu tidak boleh ada penugasan ganda pada armada yang sama dan terdapat pembatasan penggunaan kendaraan tertentu pada fasilitas yang memerlukan armada khusus.
 
-### 📐 Pemodelan Matematis Formal Tiga Serangkai $\langle X, D, C \rangle$
+### 📐 Pemodelan Matematis Formal Tiga Serangkai <X, D, C>
 
-1. **Himpunan Variabel ($X$)**:
+1. **Himpunan Variabel (X)**:
+
    Fasilitas kesehatan tujuan penerima pasokan medis darurat:
-   $$X = \{ X_{\text{Porsea}}, X_{\text{Tarutung}}, X_{\text{DolokSanggul}}, X_{\text{Pangururan}} \}$$
 
-2. **Himpunan Domain ($D$)**:
-   Opsi armada kendaraan medis dan ambulans yang tersedia pada pusat distribusi Balige:
-   $$D = \{ \text{Ambulans-01 (ColdChain)}, \text{Ambulans-02 (General)}, \text{Van-ColdChain-A}, \text{Van-ColdChain-B} \}$$
+   `X = {S1_RSUD_Porsea, S3_RSUD_Tarutung, S4_RSUD_DolokSanggul, S6_RSUD_Pangururan}`
 
-3. **Himpunan Batasan ($C$)**:
-   * **Unary Constraint (Arity 1)**:
-     $$X_{\text{Pangururan}} \neq \text{Ambulans-02 (General)}$$
-     *(Fasilitas Pangururan membutuhkan kualifikasi pendingin suhu rendah/Deep Freezer untuk kantong darah darurat).*
-   * **Binary Constraint (Arity 2)**:
-     $$\forall i \neq j, \quad X_i \neq X_j$$
-     *(Setiap armada kendaraan hanya dapat dialokasikan ke satu fasilitas kesehatan pada satu sesi pengiriman).*
+2. **Himpunan Domain (D)**:
+
+   Opsi armada kendaraan medis yang tersedia pada pusat distribusi Balige:
+
+   `D = {Ambulance_01 (ColdChain), Ambulance_02 (General), ColdChain_Van_A (DeepFreezer), ColdChain_Van_B (Standard)}`
+
+3. **Himpunan Batasan (C)**:
+
+   - **Unary Constraint (Arity 1)**:
+
+     `S6_RSUD_Pangururan ≠ Ambulance_02 (General)`
+
+     *(Armada `Ambulance_02 (General)` tidak diperbolehkan untuk fasilitas Pangururan berdasarkan restriction yang digunakan dalam model CSP.)*
+
+   - **Binary Constraint (Arity 2)**:
+
+     `vehicle(Xi) ≠ vehicle(Xj), untuk setiap i ≠ j`
+
+     *(Setiap armada kendaraan hanya dapat dialokasikan ke satu fasilitas kesehatan pada satu sesi pengiriman.)*
 
 ### 🛠️ Arsitektur Mesin Inferensi Batasan (*Constraint Solver*)
 
@@ -99,20 +109,20 @@ Modul Python [`solver.py`](file:///d:/Smartcare-Logistics/src/smartcare_logistic
 
 | Skenario Pengujian | Algoritma | Rute Lengkap yang Ditemukan | Total Cost (km) | State Dieksplorasi | Status |
 |---|---|---|:---:|:---:|:---:|
-| **S0 $\rightarrow$ S6** | **UCS** | `S0 - Balige` $\rightarrow$ `S7 - Parsoburan` $\rightarrow$ `S6 - Pangururan` | **105.00 km** | 8 state | Berhasil |
-| **S0 $\rightarrow$ S6** | **A\*** | `S0 - Balige` $\rightarrow$ `S7 - Parsoburan` $\rightarrow$ `S6 - Pangururan` | **105.00 km** | **6 state** | Berhasil |
-| **S0 $\rightarrow$ S3** | **UCS** | `S0 - Balige` $\rightarrow$ `S2 - Siborong-Borong` $\rightarrow$ `S3 - Tarutung` | **42.22 km** | 4 state | Berhasil |
-| **S0 $\rightarrow$ S3** | **A\*** | `S0 - Balige` $\rightarrow$ `S2 - Siborong-Borong` $\rightarrow$ `S3 - Tarutung` | **42.22 km** | **3 state** | Berhasil |
-| **S0 $\rightarrow$ S4** | **UCS** | `S0 - Balige` $\rightarrow$ `S2 - Siborong-Borong` $\rightarrow$ `S4 - Dolok Sanggul` | **51.33 km** | 5 state | Berhasil |
-| **S0 $\rightarrow$ S4** | **A\*** | `S0 - Balige` $\rightarrow$ `S2 - Siborong-Borong` $\rightarrow$ `S4 - Dolok Sanggul` | **51.33 km** | **3 state** | Berhasil |
+| **S0 → S6** | **UCS** | `S0 - Balige` → `S7 - Parsoburan` → `S6 - Pangururan` | **105.00 km** | 8 state | Berhasil |
+| **S0 → S6** | **A\*** | `S0 - Balige` → `S7 - Parsoburan` → `S6 - Pangururan` | **105.00 km** | **6 state** | Berhasil |
+| **S0 → S3** | **UCS** | `S0 - Balige` → `S2 - Siborong-Borong` → `S3 - Tarutung` | **42.22 km** | 4 state | Berhasil |
+| **S0 → S3** | **A\*** | `S0 - Balige` → `S2 - Siborong-Borong` → `S3 - Tarutung` | **42.22 km** | **3 state** | Berhasil |
+| **S0 → S4** | **UCS** | `S0 - Balige` → `S2 - Siborong-Borong` → `S4 - Dolok Sanggul` | **51.33 km** | 5 state | Berhasil |
+| **S0 → S4** | **A\*** | `S0 - Balige` → `S2 - Siborong-Borong` → `S4 - Dolok Sanggul` | **51.33 km** | **3 state** | Berhasil |
 
 ### 2. Hasil Eksekusi & Analisis Sensitivitas CSP Milestone 2
 
 | Kasus Uji Sensitivitas | Deskripsi Masalah | Status Solusi | Node Ekspansi | Waktu Eksekusi (ms) |
 |---|---|:---:|:---:|:---:|
-| **Skala Kecil** | 3 RSUD, 4 Armada Kendaraan | **SOLUSI VALID** | 4 node | 0.31 ms |
-| **Skala Besar** | 7 RSUD, 8 Armada Kendaraan | **SOLUSI VALID** | 8 node | 1.45 ms |
-| **Kasus Ekstrem (Overconstrained)** | 4 RSUD, 2 Armada Kendaraan *(Defisit Armada)* | **TIDAK ADA SOLUSI** | 3 node | 0.31 ms |
+| **Skala Kecil** | 3 RSUD, 4 Armada Kendaraan | **SOLUSI VALID** | 4 node | 0.73 ms |
+| **Skala Besar** | 7 RSUD, 8 Armada Kendaraan | **SOLUSI VALID** | 8 node | 4.13 ms |
+| **Kasus Ekstrem (Overconstrained)** | 4 RSUD, 2 Armada Kendaraan (Defisit Armada) | **TIDAK ADA SOLUSI** | 3 node | 0.64 ms |
 
 ---
 
@@ -124,12 +134,12 @@ SmartCare-Logistics/
 ├── src/
 │   ├── smartcare_logistics/
 │   │   ├── __init__.py
-│   │   ├── search.py       # Algoritma UCS, A*, & Heuristik Admissible (heapq)
-│   │   └── solver.py       # Mesin Inferensi CSP (AC-3, Backtracking MRV/LCV/FC)
-│   └── main.py             # Skrip simulasi utama Milestone 1 & Milestone 2
+│   │   ├── search.py        # Algoritma UCS, A*, dan heuristik
+│   │   └── solver.py        # Mesin Inferensi CSP (AC-3, Backtracking MRV/LCV/FC)
+│   └── main.py              # Skrip simulasi utama Milestone 1 & Milestone 2
 ├── tests/
-│   ├── test_search.py      # Pengujian otomatis State-Space Search (pytest)
-│   └── test_solver.py      # Pengujian otomatis CSP Solver (pytest)
+│   ├── test_search.py       # Pengujian otomatis State-Space Search (pytest)
+│   └── test_solver.py       # Pengujian otomatis CSP Solver (pytest)
 ├── .gitignore
 ├── .python-version
 ├── LICENSE                 # Lisensi MIT

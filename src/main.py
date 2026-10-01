@@ -35,7 +35,7 @@ def run_milestone1_experiments():
     print(" Titik Awal / Initial State (S0) : S0 - Balige (titik distribusi medis)")
     print(" Satuan Biaya Perjalanan (Cost) : Jarak Tempuh (Kilometer / km)")
     print(" Metodologi Heuristik A*       : h(n) = d_hop(n, Goal) * c_min (c_min = 19.42 km)")
-    print(" Sifat Heuristik                : Terbukti Admissible (h(n) <= h*(n)) & Consistent")
+    print(" Sifat Heuristik                :  Admissible (h(n) <= h*(n))")
     print("=" * 88 + "\n")
 
     scenarios = [
@@ -137,7 +137,7 @@ def run_milestone2_experiments():
     print("[2/3] Menguji Propagasi Batasan AC-3 (Arc Consistency 3)...")
     is_ac3_ok, arcs_processed = ac3(csp)
     print(f"      -> AC-3 Status                 : {'LULUS (Graf Konsisten)' if is_ac3_ok else 'GAGAL (Domain Kosong)'}")
-    print(f"      -> Arc Diperiksa / Dipangkas  : {arcs_processed} arc\n")
+    print(f"      -> Arc Diproses   : {arcs_processed} arc\n")
 
     print("[3/3] Menjalankan Backtracking Search (MRV + LCV + Forward Checking)...")
     solution, stats = backtracking_search(csp, use_mrv=True, use_lcv=True, use_fc=True)
