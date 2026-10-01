@@ -1,7 +1,7 @@
 import sys
 import os
 
-# Add src path
+# Tambahkan direktori src ke sys.path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from smartcare_logistics.search import (
@@ -14,7 +14,7 @@ from smartcare_logistics.search import (
 
 
 def test_main_scenario_s0_to_s6():
-    """Verify S0 -> S6 main scenario results match report (105.00 km, UCS=8 state, A*=6 state)."""
+    """Memverifikasi hasil skenario utama S0 -> S6 sesuai laporan (105.00 km, UCS=8 state, A*=6 state)."""
     ucs_path, ucs_cost, ucs_explored = uniform_cost_search(GRAPH, "S0", "S6")
     astar_path, astar_cost, astar_explored = a_star_search(GRAPH, "S0", "S6", HEURISTIC_S6)
 
@@ -26,12 +26,12 @@ def test_main_scenario_s0_to_s6():
     assert round(astar_cost, 2) == 105.00
     assert astar_explored == 6
 
-    # Verify A* explores fewer nodes than UCS
+    # Memastikan A* mengeksplorasi state lebih sedikit dibanding UCS
     assert astar_explored < ucs_explored
 
 
 def test_scenario_s0_to_s3():
-    """Verify S0 -> S3 scenario results match report (42.22 km, UCS=4 state, A*=3 state)."""
+    """Memverifikasi hasil skenario S0 -> S3 sesuai laporan (42.22 km, UCS=4 state, A*=3 state)."""
     ucs_path, ucs_cost, ucs_explored = uniform_cost_search(GRAPH, "S0", "S3")
     heuristic_s3 = compute_admissible_heuristic(GRAPH, "S3")
     astar_path, astar_cost, astar_explored = a_star_search(GRAPH, "S0", "S3", heuristic_s3)
@@ -46,7 +46,7 @@ def test_scenario_s0_to_s3():
 
 
 def test_scenario_s0_to_s4():
-    """Verify S0 -> S4 scenario results match report (51.33 km, UCS=5 state, A*=3 state)."""
+    """Memverifikasi hasil skenario S0 -> S4 sesuai laporan (51.33 km, UCS=5 state, A*=3 state)."""
     ucs_path, ucs_cost, ucs_explored = uniform_cost_search(GRAPH, "S0", "S4")
     heuristic_s4 = compute_admissible_heuristic(GRAPH, "S4")
     astar_path, astar_cost, astar_explored = a_star_search(GRAPH, "S0", "S4", heuristic_s4)
@@ -61,23 +61,23 @@ def test_scenario_s0_to_s4():
 
 
 def test_heuristic_admissibility_proof():
-    """Verify that heuristic h(n) <= h*(n) (true minimum cost to goal S6) for all nodes."""
+    """Memverifikasi bahwa heuristik h(n) <= h*(n) (biaya minimum aktual ke goal S6) untuk seluruh simpul."""
     goal = "S6"
     for node in GRAPH:
         _, true_cost, _ = uniform_cost_search(GRAPH, node, goal)
         h_val = HEURISTIC_S6[node]
-        assert h_val <= true_cost, f"Heuristic overestimates at node {node}: {h_val} > {true_cost}"
+        assert h_val <= true_cost, f"Heuristik terlalu tinggi pada simpul {node}: {h_val} > {true_cost}"
 
 
 def test_dynamic_heuristic_generator():
-    """Verify dynamic compute_admissible_heuristic produces valid admissible values."""
+    """Memverifikasi generator compute_admissible_heuristic dinamis menghasilkan nilai admissible yang valid."""
     heuristic_s6_calc = compute_admissible_heuristic(GRAPH, "S6")
     for node in GRAPH:
         assert heuristic_s6_calc[node] == HEURISTIC_S6[node]
 
 
 def test_edge_case_unreachable_node():
-    """Verify search handles disconnected nodes gracefully."""
+    """Memverifikasi algoritma mampu menangani simpul yang terisolasi/tidak terhubung."""
     disconnected_graph = {
         "Node_A": {"Node_B": 10.0},
         "Node_B": {"Node_A": 10.0},
@@ -89,7 +89,7 @@ def test_edge_case_unreachable_node():
 
 
 def test_edge_case_start_equals_goal():
-    """Verify search returns 0 cost when start node equals goal node."""
+    """Memverifikasi algoritma mengembalikan biaya 0 ketika simpul awal sama dengan simpul tujuan."""
     path, cost, explored = uniform_cost_search(GRAPH, "S0", "S0")
     assert path == ["S0"]
     assert cost == 0.0

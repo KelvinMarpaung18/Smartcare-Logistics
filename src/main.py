@@ -1,7 +1,7 @@
 import sys
 import os
 
-# Ensure src path is available
+# Memastikan direktori src dapat diakses oleh sys.path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from smartcare_logistics.search import (
@@ -35,7 +35,7 @@ def run_milestone1_experiments():
     print(" Titik Awal / Initial State (S0) : S0 - Balige (titik distribusi medis)")
     print(" Satuan Biaya Perjalanan (Cost) : Jarak Tempuh (Kilometer / km)")
     print(" Metodologi Heuristik A*       : h(n) = d_hop(n, Goal) * c_min (c_min = 19.42 km)")
-    print(" Sifat Heuristik                :  Admissible (h(n) <= h*(n))")
+    print(" Sifat Heuristik                : Admissible (h(n) <= h*(n))")
     print("=" * 88 + "\n")
 
     scenarios = [
@@ -51,11 +51,11 @@ def run_milestone1_experiments():
     summary_data = []
 
     for name, start_node, goal_node in scenarios:
-        # UCS Search
+        # Pencarian UCS
         ucs_path, ucs_cost, ucs_explored = uniform_cost_search(GRAPH, start_node, goal_node)
         ucs_status = "Berhasil" if ucs_path else "Gagal"
 
-        # A* Search
+        # Pencarian A*
         heuristic = compute_admissible_heuristic(GRAPH, goal_node)
         astar_path, astar_cost, astar_explored = a_star_search(GRAPH, start_node, goal_node, heuristic)
         astar_status = "Berhasil" if astar_path else "Gagal"
@@ -108,7 +108,7 @@ def run_milestone2_experiments():
     print(" Propagasi Selama Pencarian    : Forward Checking (FC)")
     print("=" * 88 + "\n")
 
-    # Defined Case Study: Emergency Ambulance & Medical Supply Fleet Allocation
+    # Studi Kasus: Alokasi Armada Ambulans Medis & Kendaraan Logistik Darurat
     hospitals = [
         "S1_RSUD_Porsea", 
         "S3_RSUD_Tarutung", 
@@ -124,7 +124,7 @@ def run_milestone2_experiments():
     ]
 
     unary_restrictions = {
-        "S6_RSUD_Pangururan": ["Ambulance_02 (General)"]  # Pangururan requires Deep Freezing or ColdChain Van
+        "S6_RSUD_Pangururan": ["Ambulance_02 (General)"]  # Pangururan memerlukan fasilitas pendingin suhu rendah (Deep Freezing)
     }
 
     print("[1/3] Membangun Model CSP Formal Alokasi Armada Medis...")
@@ -137,7 +137,7 @@ def run_milestone2_experiments():
     print("[2/3] Menguji Propagasi Batasan AC-3 (Arc Consistency 3)...")
     is_ac3_ok, arcs_processed = ac3(csp)
     print(f"      -> AC-3 Status                 : {'LULUS (Graf Konsisten)' if is_ac3_ok else 'GAGAL (Domain Kosong)'}")
-    print(f"      -> Arc Diproses   : {arcs_processed} arc\n")
+    print(f"      -> Arc Diproses               : {arcs_processed} arc\n")
 
     print("[3/3] Menjalankan Backtracking Search (MRV + LCV + Forward Checking)...")
     solution, stats = backtracking_search(csp, use_mrv=True, use_lcv=True, use_fc=True)

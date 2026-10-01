@@ -2,9 +2,9 @@ import heapq
 from collections import deque
 from typing import Dict, List, Tuple, Optional
 
-# Definition of the State-Space Graph for Medical Supply Distribution in Toba Region
-# Nodes: Health Facilities & Distribution Hubs (S0 to S7)
-# Edges: Undirected adjacency list with real-world travel distance in kilometers (km)
+# Definisi Graf Ruang Keadaan untuk Distribusi Pasokan Medis di Wilayah Toba
+# Simpul (Nodes): Fasilitas Kesehatan & Pusat Distribusi Medis (S0 hingga S7)
+# Busur (Edges): Graf tak berarah (undirected) dengan bobot jarak perjalanan nyata dalam kilometer (km)
 GRAPH: Dict[str, Dict[str, float]] = {
     "S0": {"S1": 22.00, "S2": 22.80, "S7": 52.00},
     "S1": {"S0": 22.00},
@@ -16,7 +16,7 @@ GRAPH: Dict[str, Dict[str, float]] = {
     "S7": {"S0": 52.00, "S6": 53.00}
 }
 
-# Location labels mapping state codes to full facility names (as shown in Image 2)
+# Pemetaan kode state ke nama fasilitas kesehatan dan lokasi lengkap
 LOCATIONS: Dict[str, str] = {
     "S0": "S0 - Balige (titik distribusi medis)",
     "S1": "S1 - RSUD Porsea",
@@ -28,26 +28,26 @@ LOCATIONS: Dict[str, str] = {
     "S7": "S7 - Parsoburan"
 }
 
-# Minimum edge weight in the entire graph (used for admissible heuristic formulation)
+# Bobot edge terkecil pada seluruh graf (digunakan untuk formulasi heuristik admissible)
 C_MIN: float = 19.42
 
-# Default Heuristic Function h(n) for Main Goal State S6 (Pangururan)
-# h(n) = d_hop(n, S6) * C_MIN (where C_MIN = 19.42 km)
-# Proven admissible: h(n) <= h*(n) for all nodes n
+# Fungsi Heuristik Default h(n) untuk Goal Utama S6 (Pangururan)
+# Formula: h(n) = d_hop(n, S6) * C_MIN (di mana C_MIN = 19.42 km)
+# Terbukti Admissible: h(n) <= h*(n) untuk seluruh simpul n
 HEURISTIC_S6: Dict[str, float] = {
-    "S0": 38.84,  # min hop = 2 -> 2 * 19.42
-    "S1": 58.26,  # min hop = 3 -> 3 * 19.42
-    "S2": 58.26,  # min hop = 3 -> 3 * 19.42
-    "S3": 77.68,  # min hop = 4 -> 4 * 19.42
-    "S4": 38.84,  # min hop = 2 -> 2 * 19.42
-    "S5": 19.42,  # min hop = 1 -> 1 * 19.42
-    "S6": 0.00,   # min hop = 0 -> 0 * 19.42
-    "S7": 19.42   # min hop = 1 -> 1 * 19.42
+    "S0": 38.84,  # hop minimum = 2 -> 2 * 19.42
+    "S1": 58.26,  # hop minimum = 3 -> 3 * 19.42
+    "S2": 58.26,  # hop minimum = 3 -> 3 * 19.42
+    "S3": 77.68,  # hop minimum = 4 -> 4 * 19.42
+    "S4": 38.84,  # hop minimum = 2 -> 2 * 19.42
+    "S5": 19.42,  # hop minimum = 1 -> 1 * 19.42
+    "S6": 0.00,   # hop minimum = 0 -> 0 * 19.42
+    "S7": 19.42   # hop minimum = 1 -> 1 * 19.42
 }
 
 
 def get_full_path_names(path: Optional[List[str]]) -> str:
-    """Helper function to format a path list into full facility names string."""
+    """Fungsi pembantu untuk memformat daftar urutan state menjadi string nama fasilitas lengkap."""
     if not path:
         return "Tidak Ada Rute"
     return " -> ".join([LOCATIONS.get(node, node) for node in path])
@@ -59,15 +59,15 @@ def compute_admissible_heuristic(
     c_min: float = C_MIN
 ) -> Dict[str, float]:
     """
-    Computes an admissible heuristic dictionary for any goal node using BFS hop distance:
+    Menghitung kamus nilai heuristik admissible untuk sembarang node goal menggunakan jarak hop BFS:
     h(n) = min_hops(n, goal) * c_min.
-    Guaranteed admissible since c_min is lower bound of edge cost in graph.
+    Dijamin admissible karena c_min adalah batas bawah biaya edge pada graf.
     """
     heuristic: Dict[str, float] = {}
     if goal not in graph:
         return {node: 0.0 for node in graph}
 
-    # BFS to calculate minimum hop distance from goal to all nodes
+    # BFS untuk menghitung jumlah hop minimum dari goal ke seluruh node
     queue: deque = deque([(goal, 0)])
     visited_hops: Dict[str, int] = {goal: 0}
 
@@ -91,9 +91,9 @@ def uniform_cost_search(
     goal: str
 ) -> Tuple[Optional[List[str]], float, int]:
     """
-    Uniform Cost Search (UCS) algorithm using a priority queue (heapq).
-    Returns tuple of (optimal_path, total_cost_km, nodes_explored).
-    Goal test is performed when node is popped from queue.
+    Algoritma Uniform Cost Search (UCS) berbasis priority queue (heapq).
+    Mengembalikan tuple (optimal_path, total_cost_km, nodes_explored).
+    Uji tujuan (goal test) dilakukan saat node di-pop dari queue.
     """
     if start not in graph or goal not in graph:
         return None, float("inf"), 0
@@ -128,9 +128,9 @@ def a_star_search(
     heuristic: Optional[Dict[str, float]] = None
 ) -> Tuple[Optional[List[str]], float, int]:
     """
-    A* Search algorithm using priority queue (heapq) guided by admissible heuristic.
-    Returns tuple of (optimal_path, total_cost_km, nodes_explored).
-    Goal test is performed when node is popped from queue.
+    Algoritma A* Search berbasis priority queue (heapq) yang dipandu fungsi heuristik admissible.
+    Mengembalikan tuple (optimal_path, total_cost_km, nodes_explored).
+    Uji tujuan (goal test) dilakukan saat node di-pop dari queue.
     """
     if start not in graph or goal not in graph:
         return None, float("inf"), 0
@@ -139,7 +139,7 @@ def a_star_search(
         heuristic = compute_admissible_heuristic(graph, goal)
 
     initial_h = heuristic.get(start, 0.0)
-    # Priority Queue tuple: (f_score, g_score, current, path)
+    # Format Tuple Priority Queue: (f_score, g_score, current, path)
     pq: List[Tuple[float, float, str, List[str]]] = [(initial_h, 0.0, start, [start])]
     visited: Dict[str, float] = {}
     nodes_explored = 0
