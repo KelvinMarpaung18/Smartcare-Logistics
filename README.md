@@ -1,6 +1,6 @@
-# SmartCare Logistics: Optimasi Rute Distribusi Obat dan Darah Darurat di Wilayah Toba dan Sekitarnya Menggunakan Algoritma A dan Uniform Cost Search (UCS)*
+# SmartCare Logistics: Enterprise AI Copilot Optimasi Rute & Alokasi Armada Medis
 
-Sistem purwarupa pencarian ruang keadaan (*State-Space Search*) berbasis **Uniform Cost Search (UCS)** dan **A* Search** untuk penentuan rute distribusi medis paling optimal di wilayah Toba dan sekitarnya.
+Sistem purwarupa berbasis **State-Space Search (UCS & A* Search)** dan **Constraint Satisfaction Problems (CSP Solver dengan AC-3 & Backtracking MRV/LCV/FC)** untuk optimasi perutean serta alokasi kendaraan medis darurat di wilayah Toba dan sekitarnya.
 
 ---
 
@@ -15,41 +15,24 @@ Sistem purwarupa pencarian ruang keadaan (*State-Space Search*) berbasis **Unifo
 
 ---
 
-## 📌 Problem Framing & Bisnis (Wilayah Toba)
+## 📍 MILESTONE 1: STATE-SPACE SEARCH (UCS & A*)
+
+### 📌 Problem Framing & Bisnis (Wilayah Toba)
 
 * **Domain Bisnis**: Logistik Rantai Pasok Kesehatan Enterprise (*Time-Critical Medical Supply Chain Logistics*).
 * **Profil Permasalahan**: Pemindahan obat-obatan esensial dan stok kantong darah darurat dari titik distribusi medis sentral (**S0 - Balige (titik distribusi medis)**) menuju berbagai fasilitas kesehatan tujuan di wilayah Toba.
-* **Pain Points Utama**:
-  1. **Banyaknya Alternatif Rute**: Jaringan perjalanan yang menghubungkan antar-fasilitas kesehatan memiliki beberapa opsi rute cabang.
-  2. **Pemilihan Rute Manual**: Pemilihan jalur secara manual rawan menghasilkan rute sub-optimal dengan akumulasi jarak yang lebih panjang.
-  3. **Keputusan Berbasis Biaya Jarak**: Jumlah perpindahan (*hop*) yang lebih sedikit belum tentu menghasilkan total jarak perjalanan terpendek dalam kilometer.
-* **Justifikasi Solusi AI**: Penggunaan *State-Space Search* (UCS & A* Search) memungkinkan kalkulasi rute distribusi terpendek secara terstruktur, presisi, dan deterministik pada graf berbobot jarak real-life.
+* **Justifikasi Solusi AI**: *State-Space Search* (UCS & A* Search) memungkinkan kalkulasi rute distribusi terpendek secara terstruktur dan deterministik pada graf berbobot jarak real-life.
 
----
-
-## 🎯 Spesifikasi Formal PEAS
+### 🎯 Spesifikasi Formal PEAS
 
 * **Performance Measure**: Minimasi total jarak perjalanan (km), keberhasilan mencapai *goal state*, optimalitas solusi (*minimum path cost*), dan efisiensi pencarian (jumlah *state* dieksplorasi).
-* **Environment**: Jaringan rute distribusi medis di wilayah Toba dan sekitarnya (graf berbobot jarak dalam kilometer).
-* **Actuators**: Pemilihan *state* tujuan berikutnya, penentuan jalur distribusi, dan penyajian rekomendasi rute pada sistem pendukung keputusan.
+* **Environment**: Jaringan rute distribusi medis di wilayah Toba (graf berbobot jarak dalam kilometer).
+* **Actuators**: Pemilihan *state* tujuan berikutnya, penentuan jalur distribusi, dan penyajian rekomendasi rute.
 * **Sensors**: Data lokasi (*state*), data konektivitas graf (*edges*), data bobot jarak (km), *initial state*, dan *goal state*.
 
-### Karakteristik Lingkungan Operasional (6 Dimensi)
+### 🧮 Formulasi Ruang Keadaan Matematika $(X, A, T, G, C)$
 
-| Karakteristik | Klasifikasi | Penjelasan pada Proyek |
-|---|---|---|
-| **Observability** | *Partially Observable* | Informasi operasional dunia nyata tidak diperoleh secara sempurna. Model *baseline* menggunakan jaringan graf dan bobot jarak yang tersedia. |
-| **Determinism** | *Stochastic* (Dunia Nyata) | Perjalanan dunia nyata dipengaruhi faktor dinamis. Model *baseline* menggunakan bobot tetap agar eksperimen terkontrol. |
-| **Episodic / Sequential** | *Sequential* | Keputusan pada suatu *state* menentukan *state* berikutnya dan memengaruhi akumulasi total jarak. |
-| **Static / Dynamic** | *Dynamic* (Dunia Nyata) | Kondisi lalu lintas jalan nyata dapat berubah. Graf *baseline* diset konstan untuk pembandingan UCS dan A*. |
-| **Discrete / Continuous** | *Discrete* | Lokasi dan koneksi perjalanan direpresentasikan sebagai *nodes* dan *edges* diskrit pada graf. |
-| **Single-Agent / Multi-Agent**| *Single-Agent* | Agen berfokus penuh pada keputusan rutenya sendiri tanpa pemodelan kompetisi agen lain. |
-
----
-
-## 🧮 Formulasi Ruang Keadaan Matematika $(X, A, T, G, C)$
-
-* **State Space ($X$) & Nama Lokasi Lengkap**:
+* **State Space ($X$)**:
   * `S0`: **S0 - Balige (titik distribusi medis)** *(Initial State)*
   * `S1`: **S1 - RSUD Porsea**
   * `S2`: **S2 - Siborong-Borong**
@@ -58,12 +41,8 @@ Sistem purwarupa pencarian ruang keadaan (*State-Space Search*) berbasis **Unifo
   * `S5`: **S5 - Tele**
   * `S6`: **S6 - RSUD dr. Hadrianus Sinaga, Pangururan** *(Goal State Utama)*
   * `S7`: **S7 - Parsoburan**
-* **Actions ($A$)**: Opsi perpindahan menuju *state* tetangga yang terhubung langsung pada graf.
-* **Transition Model ($T$)**: $T(s, a) = s'$ sesuai konektivitas graf (*undirected graph*).
-* **Goal Test ($G$)**: Agen mencapai *state* tujuan yang ditentukan, contoh skenario utama: $G(s) = (s == \text{S6})$.
-* **Path Cost ($C$)**: Akumulasi total jarak perjalanan dalam kilometer: $C(P) = \sum_{i=0}^{n-1} c(s_i, s_{i+1})$.
 
-### 📊 Visualisasi Graf Ruang Keadaan dengan Nama Lokasi Lengkap
+### 📊 Visualisasi Graf Ruang Keadaan
 
 ```mermaid
 graph LR
@@ -79,46 +58,61 @@ graph LR
 
 ---
 
-## 🧠 Pembuktian & Verifikasi Heuristik Admissible $h(n)$
+## 🧩 MILESTONE 2: CONSTRAINT SATISFACTION PROBLEMS (CSP)
 
-Fungsi heuristik A* dirumuskan secara matematis:
-$$h(n) = d_{\text{hop}}(n, G) \times c_{\text{min}}$$
+### 📌 Problem Framing Sub-Masalah Bisnis Milestone 2
+* **Kasus Keputusan Bisnis**: **Alokasi Armada Kendaraan Medis & Ambulans Logistik Cold-Chain** (*Medical Cold-Chain Vehicle & Fleet Assignment Problem*).
+* **Latar Belakang Operasional**: Penugasan armada ambulans dan boks pendingin obat/darah darurat ke fasilitas kesehatan tujuan harus memenuhi batasan ketat (tidak boleh ada penugasan ganda pada armada yang sama dan kendaraan yang ditugaskan harus memenuhi kualifikasi pendingin suhu medis).
 
-Di mana:
-* $d_{\text{hop}}(n, G)$ = Jumlah *edge* (hop) minimum dari node $n$ menuju goal $G$.
-* $c_{\text{min}} = 19.42\text{ km}$ (bobot *edge* terkecil pada seluruh graf, yaitu hubungan `S2` - `S3`).
+### 📐 Pemodelan Matematis Formal Tiga Serangkai $\langle X, D, C \rangle$
 
-### Tabel Nilai Heuristik untuk Goal `S6` (Pangururan)
+1. **Himpunan Variabel ($X$)**:
+   Fasilitas kesehatan tujuan penerima pasokan medis darurat:
+   $$X = \{ X_{\text{S1\_Porsea}}, X_{\text{S3\_Tarutung}}, X_{\text{S4\_DolokSanggul}}, X_{\text{S6\_Pangururan}} \}$$
 
-| Kode State | Nama Lokasi Lengkap | Min Hop ke `S6` | Nilai $h(n)$ (km) | Biaya Aktual $h^*(n)$ | Status Admissible |
-|---|---|:---:|:---:|:---:|:---:|
-| `S0` | **S0 - Balige (titik distribusi medis)** | 2 | 38.84 km | 105.00 km | ✅ $38.84 \le 105.00$ |
-| `S1` | **S1 - RSUD Porsea** | 3 | 58.26 km | 127.00 km | ✅ $58.26 \le 127.00$ |
-| `S2` | **S2 - Siborong-Borong** | 3 | 58.26 km | 90.53 km | ✅ $58.26 \le 90.53$ |
-| `S3` | **S3 - RSUD Tarutung** | 4 | 77.68 km | 109.95 km | ✅ $77.68 \le 109.95$ |
-| `S4` | **S4 - RSUD Dolok Sanggul** | 2 | 38.84 km | 62.00 km | ✅ $38.84 \le 62.00$ |
-| `S5` | **S5 - Tele** | 1 | 19.42 km | 22.00 km | ✅ $19.42 \le 22.00$ |
-| `S6` | **S6 - RSUD dr. Hadrianus Sinaga, Pangururan** | 0 | 0.00 km | 0.00 km | ✅ $0.00 \le 0.00$ |
-| `S7` | **S7 - Parsoburan** | 1 | 19.42 km | 53.00 km | ✅ $19.42 \le 53.00$ |
+2. **Himpunan Domain ($D$)**:
+   Opsi armada kendaraan medis dan ambulans yang tersedia pada pusat distribusi Balige:
+   $$D = \{ \text{Ambulance\_01 (ColdChain)}, \text{Ambulance\_02 (General)}, \text{ColdChain\_Van\_A (DeepFreezer)}, \text{ColdChain\_Van\_B (Standard)} \}$$
+
+3. **Himpunan Batasan ($C$)**:
+   * **Unary Constraint (Arity 1)**:
+     $$X_{\text{S6\_Pangururan}} \neq \text{Ambulance\_02 (General)}$$
+     *(Fasilitas Pangururan membutuhkan kualifikasi pendingin suhu rendah/Deep Freezer untuk kantong darah darurat).*
+   * **Binary Constraint (Arity 2)**:
+     $$\forall i \neq j, \quad X_i \neq X_j$$
+     *(Setiap armada kendaraan hanya dapat dialokasikan ke satu fasilitas kesehatan pada satu sesi pengiriman).*
+
+### 🛠️ Arsitektur Mesin Inferensi Batasan (*Constraint Solver*)
+
+Modul Python [`solver.py`](file:///d:/Smartcare-Logistics/src/smartcare_logistics/solver.py) mengimplementasikan:
+1. **Arc Consistency 3 (AC-3)** (Mackworth, 1977): Melakukan pemangkasan nilai domain yang inkonsisten secara logis sebelum dan selama pencarian dengan prosedur `Revise(Xi, Xj)`.
+2. **Backtracking Search**: Rekursi pencarian terstruktur yang diakselerasi oleh:
+   * **MRV (Minimum Remaining Values)**: Memilih variabel berikutnya dengan sisa nilai domain paling sedikit (*Fail-First Principle*).
+   * **LCV (Least Constraining Value)**: Memilih urutan nilai domain yang paling sedikit membatasi variabel tetangga (*Fail-Last Principle*).
+   * **Forward Checking (FC)**: Melakukan propagasi langsung setiap kali variabel diberi nilai untuk mencegah eksplorasi cabang buntu.
 
 ---
 
-## 📈 Hasil Eksperimen & Perbandingan Algoritma
+## 📈 HASIL EKSPERIMEN & ANALISIS SENSITIVITAS
 
-Berdasarkan eksekusi eksperimen pada graf ruang keadaan wilayah Toba, diperoleh hasil rute lengkap sebagai berikut:
+### 1. Hasil Pencarian Rute Milestone 1 (UCS vs A*)
 
 | Skenario Pengujian | Algoritma | Rute Lengkap yang Ditemukan | Total Cost (km) | State Dieksplorasi | Status |
 |---|---|---|:---:|:---:|:---:|
-| **S0 $\rightarrow$ S6** (Balige - Pangururan) | **UCS** | `S0 - Balige (titik distribusi medis)` $\rightarrow$ `S7 - Parsoburan` $\rightarrow$ `S6 - RSUD dr. Hadrianus Sinaga, Pangururan` | **105.00 km** | 8 state | Berhasil |
-| **S0 $\rightarrow$ S6** (Balige - Pangururan) | **A\*** | `S0 - Balige (titik distribusi medis)` $\rightarrow$ `S7 - Parsoburan` $\rightarrow$ `S6 - RSUD dr. Hadrianus Sinaga, Pangururan` | **105.00 km** | **6 state** | Berhasil |
-| **S0 $\rightarrow$ S3** (Balige - Tarutung) | **UCS** | `S0 - Balige (titik distribusi medis)` $\rightarrow$ `S2 - Siborong-Borong` $\rightarrow$ `S3 - RSUD Tarutung` | **42.22 km** | 4 state | Berhasil |
-| **S0 $\rightarrow$ S3** (Balige - Tarutung) | **A\*** | `S0 - Balige (titik distribusi medis)` $\rightarrow$ `S2 - Siborong-Borong` $\rightarrow$ `S3 - RSUD Tarutung` | **42.22 km** | **3 state** | Berhasil |
-| **S0 $\rightarrow$ S4** (Balige - Dolok Sanggul) | **UCS** | `S0 - Balige (titik distribusi medis)` $\rightarrow$ `S2 - Siborong-Borong` $\rightarrow$ `S4 - RSUD Dolok Sanggul` | **51.33 km** | 5 state | Berhasil |
-| **S0 $\rightarrow$ S4** (Balige - Dolok Sanggul) | **A\*** | `S0 - Balige (titik distribusi medis)` $\rightarrow$ `S2 - Siborong-Borong` $\rightarrow$ `S4 - RSUD Dolok Sanggul` | **51.33 km** | **3 state** | Berhasil |
+| **S0 $\rightarrow$ S6** | **UCS** | `S0 - Balige` $\rightarrow$ `S7 - Parsoburan` $\rightarrow$ `S6 - Pangururan` | **105.00 km** | 8 state | Berhasil |
+| **S0 $\rightarrow$ S6** | **A\*** | `S0 - Balige` $\rightarrow$ `S7 - Parsoburan` $\rightarrow$ `S6 - Pangururan` | **105.00 km** | **6 state** | Berhasil |
+| **S0 $\rightarrow$ S3** | **UCS** | `S0 - Balige` $\rightarrow$ `S2 - Siborong-Borong` $\rightarrow$ `S3 - Tarutung` | **42.22 km** | 4 state | Berhasil |
+| **S0 $\rightarrow$ S3** | **A\*** | `S0 - Balige` $\rightarrow$ `S2 - Siborong-Borong` $\rightarrow$ `S3 - Tarutung` | **42.22 km** | **3 state** | Berhasil |
+| **S0 $\rightarrow$ S4** | **UCS** | `S0 - Balige` $\rightarrow$ `S2 - Siborong-Borong` $\rightarrow$ `S4 - Dolok Sanggul` | **51.33 km** | 5 state | Berhasil |
+| **S0 $\rightarrow$ S4** | **A\*** | `S0 - Balige` $\rightarrow$ `S2 - Siborong-Borong` $\rightarrow$ `S4 - Dolok Sanggul` | **51.33 km** | **3 state** | Berhasil |
 
-### 💡 Analisis Temuan Eksperimen
-1. **Optimalitas Rute**: Kedua algoritma (UCS dan A*) menghasilkan rute dengan *Path Cost* (total jarak) yang identik pada seluruh skenario.
-2. **Efisiensi Pencarian**: A* Search mengeksplorasi *state* lebih sedikit dibanding UCS (contoh Skenario Utama: **6 state vs 8 state**), membuktikan efektivitas arahan fungsi heuristik $h(n)$.
+### 2. Hasil Eksekusi & Analisis Sensitivitas CSP Milestone 2
+
+| Kasus Uji Sensitivitas | Deskripsi Masalah | Status Solusi | Node Ekspansi | Waktu Eksekusi (ms) |
+|---|---|:---:|:---:|:---:|
+| **Skala Kecil** | 3 RSUD, 4 Armada Kendaraan | **SOLUSI VALID** | 4 node | 0.31 ms |
+| **Skala Besar** | 7 RSUD, 8 Armada Kendaraan | **SOLUSI VALID** | 8 node | 1.45 ms |
+| **Kasus Ekstrem (Overconstrained)** | 4 RSUD, 2 Armada Kendaraan *(Defisit Armada)* | **TIDAK ADA SOLUSI** | 3 node | 0.31 ms |
 
 ---
 
@@ -130,15 +124,17 @@ SmartCare-Logistics/
 ├── src/
 │   ├── smartcare_logistics/
 │   │   ├── __init__.py
-│   │   └── search.py       # Algoritma UCS, A*, & Nama Lokasi Lengkap S0-S7 (heapq)
-│   └── main.py             # Skrip simulasi utama & cetak rute nama lokasi lengkap
+│   │   ├── search.py       # Algoritma UCS, A*, & Heuristik Admissible (heapq)
+│   │   └── solver.py       # Mesin Inferensi CSP (AC-3, Backtracking MRV/LCV/FC)
+│   └── main.py             # Skrip simulasi utama Milestone 1 & Milestone 2
 ├── tests/
-│   └── test_search.py      # Pengujian otomatis unit test (pytest)
+│   ├── test_search.py      # Pengujian otomatis State-Space Search (pytest)
+│   └── test_solver.py      # Pengujian otomatis CSP Solver (pytest)
 ├── .gitignore
 ├── .python-version
 ├── LICENSE                 # Lisensi MIT
 ├── pyproject.toml          # Dependensi Astral uv
-├── README.md               # Dokumentasi Laporan Milestone 1 dengan Nama Tempat Lengkap
+├── README.md               # Dokumentasi Laporan Milestone 1 & 2
 └── uv.lock
 ```
 
@@ -151,12 +147,12 @@ SmartCare-Logistics/
    uv sync
    ```
 
-2. **Menjalankan Simulasi (Eksperimen Rute UCS vs A*)**:
+2. **Menjalankan Simulasi Utama (Milestone 1 & Milestone 2)**:
    ```powershell
    uv run python src/main.py
    ```
 
-3. **Menjalankan Pengujian Otomatis (Pytest)**:
+3. **Menjalankan Seluruh Pengujian Otomatis (Pytest)**:
    ```powershell
    uv run pytest
    ```
