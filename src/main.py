@@ -150,26 +150,65 @@ def run_milestone2_experiments():
     else:
         print("      -> Solusi tidak ditemukan!\n")
 
-    print("-" * 88)
-    print(" ANALYSIS SENSITIVITAS SKALA PERMASALAHAN (SMALL VS LARGE VS OVERCONSTRAINED EDGE CASE)")
-    print("-" * 88)
+    print("-" * 92)
+    print(" EVALUASI SENSITIVITAS & KOMPARASI 4 KONFIGURASI SOLVER (KONTROL PENUH)")
+    print(" (BT Dasar vs MRV vs MRV+LCV vs MRV+LCV+FC pada Berbagai Ukuran Masalah)")
+    print("-" * 92)
 
-    test_cases = [
+    scenarios = [
         ("Skala Kecil (3 RS, 4 Armada)", ["S1", "S3", "S4"], ["V1", "V2", "V3", "V4"], None),
+        ("Kasus Utama (4 RS, 4 Armada, Unary)", hospitals, fleet_vehicles, unary_restrictions),
         ("Skala Besar (7 RS, 8 Armada)", ["S1", "S2", "S3", "S4", "S5", "S6", "S7"], [f"V{i}" for i in range(1, 9)], None),
-        ("Kasus Ekstrem (Overconstrained: 4 RS, 2 Armada)", ["S1", "S2", "S3", "S4"], ["V1", "V2"], None)
+        (
+            "Kasus Terikat Ketat (4 RS, 4 Armada)",
+            ["S4", "S1", "S3", "S6"],
+            ["V1_Cold", "V2_Cold", "V3_Gen", "V4_Gen"],
+            {"S1": ["V3_Gen", "V4_Gen"], "S6": ["V3_Gen", "V4_Gen"], "S3": ["V4_Gen"]}
+        ),
+        ("Overconstrained (4 RS, 2 Armada)", ["S1", "S2", "S3", "S4"], ["V1", "V2"], None)
     ]
 
-    print(f"| {'Kasus Uji Sensitivitas':<46} | {'Status Solusi':<15} | {'Node':<6} | {'Waktu (ms)':<10} |")
-    print("+" + "-" * 86 + "+")
+    configs = [
+        ("1. BT Dasar", False, False, False),
+        ("2. MRV", True, False, False),
+        ("3. MRV + LCV", True, True, False),
+        ("4. MRV + LCV + FC", True, True, True),
+    ]
 
-    for title, hosps, vehs, restrs in test_cases:
-        test_csp = create_medical_fleet_csp(hosps, vehs, restrs)
-        sol, st = backtracking_search(test_csp)
-        status_str = "SOLUSI VALID" if sol else "TIDAK ADA SOLUSI"
-        print(f"| {title:<46} | {status_str:<15} | {st['nodes_expanded']:<6} | {st['execution_time_ms']:<10.2f} |")
+    col_w_scen = 38
+    line_sep = "+" + "-" * (col_w_scen + 2) + "+" + "-" * 19 + "+" + "-" * 15 + "+" + "-" * 7 + "+" + "-" * 7 + "+" + "-" * 11 + "+" + "-" * 12 + "+"
+    print(line_sep)
+    print(f"| {'Skenario':<{col_w_scen}} | {'Konfigurasi':<17} | {'Status Solusi':<13} | {'Valid':<5} | {'Node':<5} | {'Backtrack':<9} | {'Waktu (ms)':<10} |")
+    print(line_sep)
 
-    print("+" + "-" * 86 + "+")
+    for scen_title, hosps, vehs, restrs in scenarios:
+        for cfg_name, use_mrv, use_lcv, use_fc in configs:
+            test_csp = create_medical_fleet_csp(hosps, vehs, restrs)
+            sol, st = backtracking_search(
+                test_csp,
+                use_mrv=use_mrv,
+                use_lcv=use_lcv,
+                use_fc=use_fc
+            )
+
+            is_valid = "-"
+            if sol is not None:
+                has_all_vars = len(sol) == len(hosps)
+                is_unique = len(set(sol.values())) == len(sol)
+                restr_ok = True
+                if restrs:
+                    for h, forbidden in restrs.items():
+                        if h in sol and sol[h] in forbidden:
+                            restr_ok = False
+                is_valid = "Ya" if (has_all_vars and is_unique and restr_ok) else "Tidak"
+                status_str = "SOLUSI VALID"
+            else:
+                status_str = "TANPA SOLUSI"
+                is_valid = "Ya (N/A)"
+
+            print(f"| {scen_title:<{col_w_scen}} | {cfg_name:<17} | {status_str:<13} | {is_valid:<5} | {st['nodes_expanded']:<5} | {st['backtracks']:<9} | {st['execution_time_ms']:<10.2f} |")
+        print(line_sep)
+
     print(" [STATUS MILESTONE 2] SOLVER CSP DAN ANALISIS SENSITIVITAS BERHASIL TEREKSEKUSI 100%\n")
 
 

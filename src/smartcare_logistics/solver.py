@@ -42,10 +42,17 @@ class CSP:
         variables: List[str],
         domains: Dict[str, List[Any]],
     ) -> None:
+        if len(set(variables)) != len(variables):
+            raise ValueError("Daftar variabel tidak boleh mengandung duplikasi.")
+
+        for variable in variables:
+            if variable not in domains:
+                raise ValueError(f"Domain tidak ditemukan untuk variabel: {variable}")
+
         self.variables = list(variables)
         self.domains = {
-            variable: list(domain)
-            for variable, domain in domains.items()
+            variable: list(domains[variable])
+            for variable in self.variables
         }
 
         self.neighbors: Dict[str, Set[str]] = {
@@ -69,6 +76,9 @@ class CSP:
         if variable2 not in self.variables:
             raise ValueError(f"Variabel tidak ditemukan: {variable2}")
 
+        if variable1 == variable2:
+            raise ValueError("Constraint biner harus menghubungkan dua variabel yang berbeda.")
+
         self.neighbors[variable1].add(variable2)
         self.neighbors[variable2].add(variable1)
 
@@ -77,7 +87,7 @@ class CSP:
         # Membuat constraint arah sebaliknya.
         if (variable2, variable1) not in self.constraints:
             self.constraints[(variable2, variable1)] = (
-                lambda value2, value1: constraint(value1, value2)
+                lambda value2, value1, c=constraint: c(value1, value2)
             )
 
     def is_consistent(
@@ -154,6 +164,10 @@ def ac3(csp: CSP) -> Tuple[bool, int]:
         - int: jumlah arc yang diproses.
     """
 
+    # Deteksi dini jika ada domain variabel yang sudah kosong sebelum pemrosesan arc.
+    if any(len(csp.domains[var]) == 0 for var in csp.variables):
+        return False, 0
+
     queue: List[Tuple[str, str]] = [
         (xi, xj)
         for xi in csp.variables
@@ -171,7 +185,7 @@ def ac3(csp: CSP) -> Tuple[bool, int]:
                 return False, arcs_processed
 
             for xk in csp.neighbors[xi]:
-                if xk != xj:
+                if xk != xj and (xk, xi) not in queue:
                     queue.append((xk, xi))
 
     return True, arcs_processed

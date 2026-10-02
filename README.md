@@ -94,7 +94,7 @@ graph LR
 
 ### 🛠️ Arsitektur Mesin Inferensi Batasan (*Constraint Solver*)
 
-Modul Python [`solver.py`](file:///d:/Smartcare-Logistics/src/smartcare_logistics/solver.py) mengimplementasikan:
+Modul Python [`solver.py`](src/smartcare_logistics/solver.py) mengimplementasikan:
 1. **Arc Consistency 3 (AC-3)** (Mackworth, 1977): Melakukan pemangkasan nilai domain yang inkonsisten secara logis sebelum dan selama pencarian dengan prosedur `Revise(Xi, Xj)`.
 2. **Backtracking Search**: Rekursi pencarian terstruktur yang diakselerasi oleh:
    * **MRV (Minimum Remaining Values)**: Memilih variabel berikutnya dengan sisa nilai domain paling sedikit (*Fail-First Principle*).
@@ -116,13 +116,55 @@ Modul Python [`solver.py`](file:///d:/Smartcare-Logistics/src/smartcare_logistic
 | **S0 → S4** | **UCS** | `S0 - Balige` → `S2 - Siborong-Borong` → `S4 - Dolok Sanggul` | **51.33 km** | 5 state | Berhasil |
 | **S0 → S4** | **A\*** | `S0 - Balige` → `S2 - Siborong-Borong` → `S4 - Dolok Sanggul` | **51.33 km** | **3 state** | Berhasil |
 
-### 2. Hasil Eksekusi & Analisis Sensitivitas CSP Milestone 2
+### 2. Hasil Evaluasi & Analisis Sensitivitas CSP Milestone 2
 
-| Kasus Uji Sensitivitas | Deskripsi Masalah | Status Solusi | Node Ekspansi | Waktu Eksekusi (ms) |
-|---|---|:---:|:---:|:---:|
-| **Skala Kecil** | 3 RSUD, 4 Armada Kendaraan | **SOLUSI VALID** | 4 node | 0.73 ms |
-| **Skala Besar** | 7 RSUD, 8 Armada Kendaraan | **SOLUSI VALID** | 8 node | 4.13 ms |
-| **Kasus Ekstrem (Overconstrained)** | 4 RSUD, 2 Armada Kendaraan (Defisit Armada) | **TIDAK ADA SOLUSI** | 3 node | 0.64 ms |
+Pengujian dilakukan secara terkontrol menggunakan urutan input yang sama untuk membandingkan 4 konfigurasi solver:
+1. **Backtracking Dasar (BT Dasar)**: Pencarian backtracking murni tanpa heuristik (`use_mrv=False, use_lcv=False, use_fc=False`).
+2. **Minimum Remaining Values (MRV)**: Akselerasi pemilihan variabel berdasarkan domain tersisa paling sedikit (`use_mrv=True`).
+3. **MRV + Least Constraining Value (LCV)**: Pengurutan nilai domain dari yang paling sedikit membatasi tetangga (`use_mrv=True, use_lcv=True`).
+4. **MRV + LCV + Forward Checking (FC)**: Pemangkasan domain tetangga secara langsung setiap penugasan dibuat (`use_mrv=True, use_lcv=True, use_fc=True`).
+
+#### Definisi Metrik Evaluasi:
+* **Status Solusi**: Menunjukkan apakah penugasan armada yang legal dan lengkap berhasil ditemukan (`SOLUSI VALID` atau `TANPA SOLUSI`).
+* **Validitas Solusi**: Memverifikasi bahwa seluruh fasilitas memperoleh armada unik (All-Different) dan mematuhi batasan unary.
+* **Node Ekspansi**: Jumlah pemanggilan fungsi rekursif `backtrack()` yang dieksplorasi (termasuk root dan state terminal).
+* **Backtracks**: Frekuensi pembatalan penugasan nilai (`del assignment[var]`) akibat terdeteksinya cabang buntu atau kegagalan forward check.
+* **Waktu Eksekusi (ms)**: Waktu komputasi riil CPU yang diukur presisi menggunakan `time.perf_counter()`.
+
+#### Tabel Hasil Eksperimen Nyata (Hasil Eksekusi Lingkungan Uji):
+
+| Skenario Pengujian | Konfigurasi Solver | Status Solusi | Validitas | Node Ekspansi | Backtracks | Waktu Eksekusi (ms) |
+|---|---|:---:|:---:|:---:|:---:|:---:|
+| **Skala Kecil** (3 RS, 4 Armada) | 1. BT Dasar | **SOLUSI VALID** | Ya | 4 node | 0 | ~0.10 ms |
+| | 2. MRV | **SOLUSI VALID** | Ya | 4 node | 0 | ~0.09 ms |
+| | 3. MRV + LCV | **SOLUSI VALID** | Ya | 4 node | 0 | ~0.10 ms |
+| | 4. MRV + LCV + FC | **SOLUSI VALID** | Ya | 4 node | 0 | ~0.10 ms |
+| **Kasus Utama** (4 RS, 4 Armada, Unary) | 1. BT Dasar | **SOLUSI VALID** | Ya | 5 node | 0 | ~0.12 ms |
+| | 2. MRV | **SOLUSI VALID** | Ya | 5 node | 0 | ~0.13 ms |
+| | 3. MRV + LCV | **SOLUSI VALID** | Ya | 5 node | 0 | ~0.14 ms |
+| | 4. MRV + LCV + FC | **SOLUSI VALID** | Ya | 5 node | 0 | ~0.15 ms |
+| **Skala Besar** (7 RS, 8 Armada) | 1. BT Dasar | **SOLUSI VALID** | Ya | 8 node | 0 | ~0.41 ms |
+| | 2. MRV | **SOLUSI VALID** | Ya | 8 node | 0 | ~0.49 ms |
+| | 3. MRV + LCV | **SOLUSI VALID** | Ya | 8 node | 0 | ~0.57 ms |
+| | 4. MRV + LCV + FC | **SOLUSI VALID** | Ya | 8 node | 0 | ~0.57 ms |
+| **Kasus Terikat Ketat**<br>(4 RS, 4 Armada, Multi-Unary) | 1. BT Dasar | **SOLUSI VALID** | Ya | 17 node | 12 | ~0.15 ms |
+| | 2. MRV | **SOLUSI VALID** | Ya | **5 node** | **0** | ~0.13 ms |
+| | 3. MRV + LCV | **SOLUSI VALID** | Ya | **5 node** | **0** | ~0.13 ms |
+| | 4. MRV + LCV + FC | **SOLUSI VALID** | Ya | **5 node** | **0** | ~0.14 ms |
+| **Kasus Ekstrem (Overconstrained)**<br>(4 RS, 2 Armada - Defisit Armada) | 1. BT Dasar | **TANPA SOLUSI** | Ya (N/A) | 5 node | 4 | ~0.11 ms |
+| | 2. MRV | **TANPA SOLUSI** | Ya (N/A) | 5 node | 4 | ~0.11 ms |
+| | 3. MRV + LCV | **TANPA SOLUSI** | Ya (N/A) | 5 node | 4 | ~0.12 ms |
+| | 4. MRV + LCV + FC | **TANPA SOLUSI** | Ya (N/A) | **3 node** | 4 | ~0.12 ms |
+
+#### Analisis Hasil & Keterbatasan Model:
+1. **Akselerasi Signifikan MRV pada Masalah Terikat Ketat**:
+   Pada skenario *Kasus Terikat Ketat* (domain heterogen akibat pembatasan fasilitas), BT Dasar mengalami **12 kali backtrack** dan membutuhkan **17 node ekspansi** karena mencoba menugaskan variabel berdomain besar terlebih dahulu. Sebaliknya, konfigurasi berbasis MRV langsung menargetkan variabel dengan sisa opsi tersedikit (*Fail-First Principle*), memotong ekspansi menjadi hanya **5 node** dan **0 backtrack** (penghematan >70% node pencarian).
+2. **Efektivitas Forward Checking (FC) pada Deteksi Dini Dead-End**:
+   Pada skenario *Overconstrained* (4 fasilitas dengan hanya 2 armada), Forward Checking mendeteksi *domain wipeout* pada simpul ketiga dan memotong pohon pencarian lebih awal menjadi **3 node ekspansi** (dibandingkan 5 node pada BT Dasar dan MRV tanpa FC).
+3. **Trade-off Overhead Komputasi Heuristik pada Masalah Longgar (*Underconstrained*)**:
+   Pada masalah yang solusinya melimpah (seperti 7 RS dengan 8 armada tanpa batasan ketat), penugasan pertama langsung berhasil pada seluruh konfigurasi (0 backtracks, 8 node). Dalam kondisi ini, penghitungan jumlah konflik tetangga oleh LCV dan evaluasi domain oleh FC menimbulkan biaya kalkulasi tambahan (*overhead*), sehingga waktu eksekusi sedikit meningkat. Ini mengonfirmasi prinsip AI bahwa heuristik tidak selalu mempercepat waktu eksekusi secara absolut pada masalah sederhana/longgar, melainkan menjadi proteksi krusial terhadap ledakan kombinatorial pada masalah yang padat batasan.
+4. **Keterbatasan Model CSP Baseline**:
+   Model saat ini memodelkan ketersediaan kendaraan secara statis per sesi alokasi diskrit. Variasi dinamis real-time (seperti durasi isi ulang daya baterai drone medis, estimasi waktu tempuh berbasis lalu lintas, atau rute pulang armada) belum dimodelkan secara temporal dalam domain variabel saat ini.
 
 ---
 
@@ -131,7 +173,6 @@ Modul Python [`solver.py`](file:///d:/Smartcare-Logistics/src/smartcare_logistic
 ```text
 SmartCare-Logistics/
 ├── .venv/                  # Virtual Environment (Managed by Astral uv)
-SmartCare-Logistics/
 ├── src/
 │   ├── smartcare_logistics/
 │   │   ├── __init__.py
@@ -140,14 +181,13 @@ SmartCare-Logistics/
 │   └── main.py              # M1 & M2: Skrip simulasi utama
 ├── tests/
 │   ├── test_search.py       # M1: Pengujian State-Space Search
-│   └── test_solver.py       # M2: Pengujian CSP Solver
+│   └── test_solver.py       # M2: Pengujian CSP Solver & Validasi QA
 ├── .gitignore
 ├── .python-version
 ├── LICENSE                 # Lisensi MIT
 ├── pyproject.toml          # Konfigurasi dependensi Astral uv
 ├── README.md               # Dokumentasi Milestone 1 & Milestone 2
-└── uv.lock         # Dokumentasi Laporan Milestone 1 & 2
-└── uv.lock
+└── uv.lock                 # Lockfile dependensi Astral uv
 ```
 
 ---
