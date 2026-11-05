@@ -572,3 +572,53 @@ def test_lcv_avoids_dead_ends():
     assert stats_no_lcv["backtracks"] > 0
     assert stats_lcv["backtracks"] == 0
     assert stats_lcv["nodes_expanded"] < stats_no_lcv["nodes_expanded"]
+
+
+def test_milestone2_toba_revision_scenarios():
+    """
+    Memverifikasi pengujian CSP khusus untuk 7 Fasilitas Kesehatan Resmi Kabupaten Toba
+    sesuai dokumen perbaikan Milestone 2 (BPS Toba Dalam Angka 2025: 2 RS & 19 Puskesmas).
+    """
+    faskes_toba_7 = [
+        "RSUD_Porsea",
+        "RSU_HKBP_Balige",
+        "Puskesmas_Tandang_Buhit",
+        "Puskesmas_Soposurung",
+        "Puskesmas_Laguboti",
+        "Puskesmas_Porsea",
+        "Puskesmas_Parsoburan"
+    ]
+
+    vehicles_fleet_8 = [
+        "Ambulance_01 (ColdChain)",
+        "Ambulance_02 (General)",
+        "ColdChain_Van_A (DeepFreezer)",
+        "ColdChain_Van_B (StandardCold)",
+        "Ambulance_03 (ColdChain)",
+        "Ambulance_04 (General)",
+        "ColdChain_Van_C (DeepFreezer)",
+        "ColdChain_Van_D (StandardCold)"
+    ]
+
+    # 1. Uji Skala Besar 7 Faskes Toba dengan 8 Armada
+    csp_toba_7 = create_medical_fleet_csp(faskes_toba_7, vehicles_fleet_8)
+    sol_7, stats_7 = backtracking_search(csp_toba_7, use_mrv=True, use_lcv=True, use_fc=True)
+    assert sol_7 is not None
+    assert len(sol_7) == 7
+    assert len(set(sol_7.values())) == 7
+
+    # 2. Uji Sesi 1 (4 Faskes Toba) dengan Unary Restriction
+    faskes_sesi_1 = ["RSUD_Porsea", "RSU_HKBP_Balige", "Puskesmas_Tandang_Buhit", "Puskesmas_Laguboti"]
+    vehicles_4 = vehicles_fleet_8[:4]
+    restrictions = {"RSUD_Porsea": ["Ambulance_02 (General)"]}
+
+    csp_sesi_1 = create_medical_fleet_csp(faskes_sesi_1, vehicles_4, unary_restrictions=restrictions)
+    sol_sesi_1, stats_sesi_1 = backtracking_search(csp_sesi_1, use_mrv=True, use_lcv=True, use_fc=True)
+    assert sol_sesi_1 is not None
+    assert len(sol_sesi_1) == 4
+    assert sol_sesi_1["RSUD_Porsea"] != "Ambulance_02 (General)"
+
+    # 3. Uji Overconstrained Skenario Krisis (4 Faskes, 2 Armada)
+    csp_crisis = create_medical_fleet_csp(faskes_sesi_1, vehicles_4[:2], unary_restrictions=restrictions)
+    sol_crisis, stats_crisis = backtracking_search(csp_crisis, use_mrv=True, use_lcv=True, use_fc=True)
+    assert sol_crisis is None

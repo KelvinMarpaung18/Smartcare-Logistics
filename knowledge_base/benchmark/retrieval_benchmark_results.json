@@ -1,0 +1,377 @@
+{
+  "dense": {
+    "queries_evaluated": [
+      {
+        "query_id": "Q01",
+        "mode": "dense",
+        "is_ood_expected": false,
+        "is_ood_predicted": false,
+        "relevant_hits": 4,
+        "precision_at_k": 0.8,
+        "recall_at_k": 0.3333,
+        "mrr": 0.5,
+        "top_similarity": 0.8954254388809204,
+        "latency_ms": 284.76,
+        "retrieved_doc_ids": [
+          "DOC07",
+          "DOC06",
+          "DOC06",
+          "DOC06",
+          "DOC06"
+        ]
+      },
+      {
+        "query_id": "Q02",
+        "mode": "dense",
+        "is_ood_expected": false,
+        "is_ood_predicted": false,
+        "relevant_hits": 3,
+        "precision_at_k": 0.6,
+        "recall_at_k": 0.5,
+        "mrr": 1.0,
+        "top_similarity": 0.8936302661895752,
+        "latency_ms": 96.47,
+        "retrieved_doc_ids": [
+          "DOC03",
+          "DOC04",
+          "DOC04",
+          "DOC03",
+          "DOC03"
+        ]
+      },
+      {
+        "query_id": "Q03",
+        "mode": "dense",
+        "is_ood_expected": false,
+        "is_ood_predicted": false,
+        "relevant_hits": 5,
+        "precision_at_k": 1.0,
+        "recall_at_k": 1.0,
+        "mrr": 1.0,
+        "top_similarity": 0.8998910784721375,
+        "latency_ms": 111.32,
+        "retrieved_doc_ids": [
+          "DOC02",
+          "DOC02",
+          "DOC01",
+          "DOC01",
+          "DOC01"
+        ]
+      },
+      {
+        "query_id": "Q04",
+        "mode": "dense",
+        "is_ood_expected": false,
+        "is_ood_predicted": false,
+        "relevant_hits": 3,
+        "precision_at_k": 0.6,
+        "recall_at_k": 0.25,
+        "mrr": 1.0,
+        "top_similarity": 0.8798097372055054,
+        "latency_ms": 97.52,
+        "retrieved_doc_ids": [
+          "DOC06",
+          "DOC06",
+          "DOC06",
+          "DOC07",
+          "DOC07"
+        ]
+      },
+      {
+        "query_id": "Q05",
+        "mode": "dense",
+        "is_ood_expected": false,
+        "is_ood_predicted": false,
+        "relevant_hits": 5,
+        "precision_at_k": 1.0,
+        "recall_at_k": 1.0,
+        "mrr": 1.0,
+        "top_similarity": 0.9068174958229065,
+        "latency_ms": 109.47,
+        "retrieved_doc_ids": [
+          "DOC07",
+          "DOC07",
+          "DOC07",
+          "DOC07",
+          "DOC07"
+        ]
+      },
+      {
+        "query_id": "Q06",
+        "mode": "dense",
+        "is_ood_expected": true,
+        "is_ood_predicted": true,
+        "correct_rejection": true,
+        "precision_at_k": 1.0,
+        "recall_at_k": 1.0,
+        "mrr": 1.0,
+        "top_similarity": 0.7936446070671082,
+        "latency_ms": 103.45,
+        "retrieved_doc_ids": [
+          "DOC04",
+          "DOC07",
+          "DOC07",
+          "DOC05",
+          "DOC07"
+        ]
+      }
+    ],
+    "summary": {
+      "mean_precision_at_5": 0.8,
+      "mean_recall_at_5": 0.6167,
+      "mean_mrr": 0.9,
+      "average_latency_ms": 133.83,
+      "ood_rejection_rate_percent": 100.0
+    }
+  },
+  "bm25": {
+    "queries_evaluated": [
+      {
+        "query_id": "Q01",
+        "mode": "bm25",
+        "is_ood_expected": false,
+        "is_ood_predicted": false,
+        "relevant_hits": 3,
+        "precision_at_k": 0.6,
+        "recall_at_k": 0.3333,
+        "mrr": 1.0,
+        "top_similarity": 0.8954254388809204,
+        "latency_ms": 136.58,
+        "retrieved_doc_ids": [
+          "DOC06",
+          "DOC07",
+          "DOC06",
+          "DOC06",
+          "DOC07"
+        ]
+      },
+      {
+        "query_id": "Q02",
+        "mode": "bm25",
+        "is_ood_expected": false,
+        "is_ood_predicted": false,
+        "relevant_hits": 5,
+        "precision_at_k": 1.0,
+        "recall_at_k": 0.5,
+        "mrr": 1.0,
+        "top_similarity": 0.8936302661895752,
+        "latency_ms": 136.61,
+        "retrieved_doc_ids": [
+          "DOC03",
+          "DOC03",
+          "DOC03",
+          "DOC03",
+          "DOC03"
+        ]
+      },
+      {
+        "query_id": "Q03",
+        "mode": "bm25",
+        "is_ood_expected": false,
+        "is_ood_predicted": false,
+        "relevant_hits": 2,
+        "precision_at_k": 0.4,
+        "recall_at_k": 1.0,
+        "mrr": 1.0,
+        "top_similarity": 0.8998910784721375,
+        "latency_ms": 122.06,
+        "retrieved_doc_ids": [
+          "DOC02",
+          "DOC07",
+          "DOC01",
+          "DOC07",
+          "DOC04"
+        ]
+      },
+      {
+        "query_id": "Q04",
+        "mode": "bm25",
+        "is_ood_expected": false,
+        "is_ood_predicted": false,
+        "relevant_hits": 4,
+        "precision_at_k": 0.8,
+        "recall_at_k": 0.25,
+        "mrr": 1.0,
+        "top_similarity": 0.8798097372055054,
+        "latency_ms": 106.17,
+        "retrieved_doc_ids": [
+          "DOC06",
+          "DOC07",
+          "DOC06",
+          "DOC06",
+          "DOC06"
+        ]
+      },
+      {
+        "query_id": "Q05",
+        "mode": "bm25",
+        "is_ood_expected": false,
+        "is_ood_predicted": false,
+        "relevant_hits": 5,
+        "precision_at_k": 1.0,
+        "recall_at_k": 1.0,
+        "mrr": 1.0,
+        "top_similarity": 0.9068174958229065,
+        "latency_ms": 109.28,
+        "retrieved_doc_ids": [
+          "DOC07",
+          "DOC07",
+          "DOC07",
+          "DOC07",
+          "DOC07"
+        ]
+      },
+      {
+        "query_id": "Q06",
+        "mode": "bm25",
+        "is_ood_expected": true,
+        "is_ood_predicted": true,
+        "correct_rejection": true,
+        "precision_at_k": 1.0,
+        "recall_at_k": 1.0,
+        "mrr": 1.0,
+        "top_similarity": 0.7936446070671082,
+        "latency_ms": 91.35,
+        "retrieved_doc_ids": [
+          "DOC01",
+          "DOC01",
+          "DOC01",
+          "DOC03",
+          "DOC04"
+        ]
+      }
+    ],
+    "summary": {
+      "mean_precision_at_5": 0.76,
+      "mean_recall_at_5": 0.6167,
+      "mean_mrr": 1.0,
+      "average_latency_ms": 117.01,
+      "ood_rejection_rate_percent": 100.0
+    }
+  },
+  "hybrid": {
+    "queries_evaluated": [
+      {
+        "query_id": "Q01",
+        "mode": "hybrid",
+        "is_ood_expected": false,
+        "is_ood_predicted": false,
+        "relevant_hits": 4,
+        "precision_at_k": 0.8,
+        "recall_at_k": 0.3333,
+        "mrr": 0.5,
+        "top_similarity": 0.8954254388809204,
+        "latency_ms": 101.87,
+        "retrieved_doc_ids": [
+          "DOC07",
+          "DOC06",
+          "DOC06",
+          "DOC06",
+          "DOC06"
+        ]
+      },
+      {
+        "query_id": "Q02",
+        "mode": "hybrid",
+        "is_ood_expected": false,
+        "is_ood_predicted": false,
+        "relevant_hits": 4,
+        "precision_at_k": 0.8,
+        "recall_at_k": 0.5,
+        "mrr": 1.0,
+        "top_similarity": 0.8936302661895752,
+        "latency_ms": 95.77,
+        "retrieved_doc_ids": [
+          "DOC03",
+          "DOC03",
+          "DOC03",
+          "DOC03",
+          "DOC04"
+        ]
+      },
+      {
+        "query_id": "Q03",
+        "mode": "hybrid",
+        "is_ood_expected": false,
+        "is_ood_predicted": false,
+        "relevant_hits": 5,
+        "precision_at_k": 1.0,
+        "recall_at_k": 1.0,
+        "mrr": 1.0,
+        "top_similarity": 0.8998910784721375,
+        "latency_ms": 114.8,
+        "retrieved_doc_ids": [
+          "DOC02",
+          "DOC01",
+          "DOC02",
+          "DOC01",
+          "DOC01"
+        ]
+      },
+      {
+        "query_id": "Q04",
+        "mode": "hybrid",
+        "is_ood_expected": false,
+        "is_ood_predicted": false,
+        "relevant_hits": 3,
+        "precision_at_k": 0.6,
+        "recall_at_k": 0.25,
+        "mrr": 1.0,
+        "top_similarity": 0.8798097372055054,
+        "latency_ms": 99.93,
+        "retrieved_doc_ids": [
+          "DOC06",
+          "DOC06",
+          "DOC06",
+          "DOC07",
+          "DOC07"
+        ]
+      },
+      {
+        "query_id": "Q05",
+        "mode": "hybrid",
+        "is_ood_expected": false,
+        "is_ood_predicted": false,
+        "relevant_hits": 5,
+        "precision_at_k": 1.0,
+        "recall_at_k": 1.0,
+        "mrr": 1.0,
+        "top_similarity": 0.9068174958229065,
+        "latency_ms": 113.92,
+        "retrieved_doc_ids": [
+          "DOC07",
+          "DOC07",
+          "DOC07",
+          "DOC07",
+          "DOC07"
+        ]
+      },
+      {
+        "query_id": "Q06",
+        "mode": "hybrid",
+        "is_ood_expected": true,
+        "is_ood_predicted": true,
+        "correct_rejection": true,
+        "precision_at_k": 1.0,
+        "recall_at_k": 1.0,
+        "mrr": 1.0,
+        "top_similarity": 0.7936446070671082,
+        "latency_ms": 115.17,
+        "retrieved_doc_ids": [
+          "DOC04",
+          "DOC01",
+          "DOC01",
+          "DOC07",
+          "DOC07"
+        ]
+      }
+    ],
+    "summary": {
+      "mean_precision_at_5": 0.84,
+      "mean_recall_at_5": 0.6167,
+      "mean_mrr": 0.9,
+      "average_latency_ms": 106.91,
+      "ood_rejection_rate_percent": 100.0
+    }
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "Config_A_200_30": {
+    "name": "Config_A_200_30",
+    "chunk_size_words": 200,
+    "overlap_words": 30,
+    "total_chunks": 1025,
+    "chunking_time_seconds": 0.02,
+    "token_stats": {
+      "avg_tokens": 230.59,
+      "max_tokens": 575,
+      "min_tokens": 3,
+      "max_allowed": 512,
+      "truncated_chunks_count": 7,
+      "truncation_risk_percent": 0.68
+    }
+  },
+  "Config_B_300_50": {
+    "name": "Config_B_300_50",
+    "chunk_size_words": 300,
+    "overlap_words": 50,
+    "total_chunks": 747,
+    "chunking_time_seconds": 0.03,
+    "token_stats": {
+      "avg_tokens": 305.53,
+      "max_tokens": 841,
+      "min_tokens": 3,
+      "max_allowed": 512,
+      "truncated_chunks_count": 18,
+      "truncation_risk_percent": 2.41
+    }
+  },
+  "Config_C_400_75": {
+    "name": "Config_C_400_75",
+    "chunk_size_words": 400,
+    "overlap_words": 75,
+    "total_chunks": 639,
+    "chunking_time_seconds": 0.02,
+    "token_stats": {
+      "avg_tokens": 347.89,
+      "max_tokens": 1041,
+      "min_tokens": 3,
+      "max_allowed": 512,
+      "truncated_chunks_count": 113,
+      "truncation_risk_percent": 17.68
+    }
+  }
+}

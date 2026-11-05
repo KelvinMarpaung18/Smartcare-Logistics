@@ -5,6 +5,18 @@ build/
 dist/
 wheels/
 *.egg-info
+.pytest_cache/
 
 # Virtual environments
-.venv
+.venv/
+
+# Large model weights (Hugging Face cache)
+knowledge_base/model_cache/
+
+# Generated vector database & search indexes (can be regenerated with pipeline)
+knowledge_base/chroma_db/
+knowledge_base/lexical_index/
+knowledge_base/processed/
+
+# Raw chunk dumps (only keep chunking_experiments_report.json)
+knowledge_base/chunks/chunks_*.json
