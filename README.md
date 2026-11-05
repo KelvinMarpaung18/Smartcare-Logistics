@@ -172,56 +172,6 @@ Pengujian dilakukan secara terkontrol menggunakan urutan input yang sama untuk m
 
 ---
 
-## 📁 Struktur Repositori
-
-```text
-SmartCare-Logistics/
-├── .venv/                      # Virtual Environment (Managed by Astral uv)
-├── knowledge_base/             # Aset & Penyimpanan Knowledge Base Milestone 3
-│   ├── documents/              # 10 Dokumen PDF Resmi (Kemenkes RI & WHO)
-│   ├── processed/              # Data teks hasil ekstraksi & pembersihan (JSON)
-│   ├── chunks/                 # Hasil eksperimen chunking & laporan token safety
-│   ├── chroma_db/              # Persistent Vector Database ChromaDB (768-D Cosine)
-│   ├── lexical_index/          # Persistent Lexical Index BM25Okapi
-│   ├── benchmark/              # Hasil evaluasi 6 Business Queries (JSON)
-│   ├── model_cache/            # Cache lokal model intfloat/multilingual-e5-base
-├── src/
-│   ├── smartcare_logistics/
-│   │   ├── __init__.py
-│   │   ├── search.py           # M1: Algoritma UCS, A*, dan heuristik
-│   │   ├── solver.py           # M2: Mesin Inferensi CSP (AC-3, Backtracking MRV/LCV/FC)
-│   │   └── knowledge_base/     # M3: Paket Enterprise Knowledge Base & Search
-│   │       ├── __init__.py
-│   │       ├── config.py           # Konfigurasi path, model, dan parameter threshold
-│   │       ├── document_metadata.py # Registri metadata resmi 10 dokumen PDF
-│   │       ├── pdf_extractor.py    # Ekstraksi PyMuPDF per halaman
-│   │       ├── text_cleaner.py     # Pembersihan teks & proteksi suhu cold chain
-│   │       ├── chunker.py          # Word-aware recursive chunker
-│   │       ├── embedding.py        # Model dense embedding multilingual-e5-base (768-D)
-│   │       ├── vector_store.py     # Persistent ChromaDB client & collection manager
-│   │       ├── lexical_search.py   # BM25Okapi search engine
-│   │       ├── hybrid_search.py    # Reciprocal Rank Fusion (RRF) retriever
-│   │       ├── retriever.py        # Unified Search API & deteksi Out-of-Domain (OOD)
-│   │       ├── pipeline.py         # End-to-end ingestion & indexing pipeline
-│   │       ├── experiment_chunking.py # Skrip runner eksperimen variasi chunking
-│   │       ├── run_pipeline.py     # Runner eksekusi penuh pipeline korpus
-│   │       ├── benchmark.py        # Framework evaluasi 6 business queries
-│   │       ├── run_benchmark.py    # Runner kalkulasi metrik benchmark retrieval
-│   └── main.py                 # M1, M2 & M3: Skrip eksekusi terpadu sistem
-├── tests/
-│   ├── test_search.py          # M1: Pengujian State-Space Search (UCS & A*)
-│   ├── test_solver.py          # M2: Pengujian CSP Solver & Validasi QA
-│   └── test_knowledge_base.py  # M3: Pengujian Knowledge Base, ChromaDB, BM25 & OOD
-├── .gitignore
-├── .python-version
-├── LICENSE                     # Lisensi MIT
-├── pyproject.toml              # Konfigurasi dependensi Astral uv
-├── README.md                   # Dokumentasi Lengkap Milestone 1, 2, & 3
-└── uv.lock                     # Lockfile dependensi Astral uv
-```
-
----
-
 ## 📚 MILESTONE 3: VECTOR KNOWLEDGE BASE & HYBRID SEARCH
 
 ### 📌 Problem Framing & Fondasi RAG Enterprise
@@ -333,11 +283,55 @@ Evaluasi kuantitatif dilakukan terhadap 6 kueri bisnis representatif:
 
 **Ketahanan terhadap Kueri Out-of-Domain (OOD)**:
 Ambang batas kemiripan kosinus dikalibrasi pada `OOD_SIMILARITY_THRESHOLD = 0.80`. Pada kueri Q06 (makanan khas daerah Balige), sistem mendeteksi kemiripan tertinggi hanya `0.7936` (< 0.80), sehingga sistem secara deterministik menolak kueri tersebut (100% True Rejection) dan menghasilkan pesan peringatan tanpa memicu halusinasi dokumen medis.
-
 ---
 
-### 📄 Laporan Akademik PDF Resmi
-Laporan akademik resmi tersimpan dan siap dikumpulkan pada direktori:
+## 📁 Struktur Repositori
+
+```text
+SmartCare-Logistics/
+├── .venv/                      # Virtual Environment (Managed by Astral uv)
+├── knowledge_base/             # Aset & Penyimpanan Knowledge Base Milestone 3
+│   ├── documents/              # 10 Dokumen PDF Resmi (Kemenkes RI & WHO)
+│   ├── processed/              # Data teks hasil ekstraksi & pembersihan (JSON)
+│   ├── chunks/                 # Hasil eksperimen chunking & laporan token safety
+│   ├── chroma_db/              # Persistent Vector Database ChromaDB (768-D Cosine)
+│   ├── lexical_index/          # Persistent Lexical Index BM25Okapi
+│   ├── benchmark/              # Hasil evaluasi 6 Business Queries (JSON)
+│   ├── model_cache/            # Cache lokal model intfloat/multilingual-e5-base
+├── src/
+│   ├── smartcare_logistics/
+│   │   ├── __init__.py
+│   │   ├── search.py           # M1: Algoritma UCS, A*, dan heuristik
+│   │   ├── solver.py           # M2: Mesin Inferensi CSP (AC-3, Backtracking MRV/LCV/FC)
+│   │   └── knowledge_base/     # M3: Paket Enterprise Knowledge Base & Search
+│   │       ├── __init__.py
+│   │       ├── config.py           # Konfigurasi path, model, dan parameter threshold
+│   │       ├── document_metadata.py # Registri metadata resmi 10 dokumen PDF
+│   │       ├── pdf_extractor.py    # Ekstraksi PyMuPDF per halaman
+│   │       ├── text_cleaner.py     # Pembersihan teks & proteksi suhu cold chain
+│   │       ├── chunker.py          # Word-aware recursive chunker
+│   │       ├── embedding.py        # Model dense embedding multilingual-e5-base (768-D)
+│   │       ├── vector_store.py     # Persistent ChromaDB client & collection manager
+│   │       ├── lexical_search.py   # BM25Okapi search engine
+│   │       ├── hybrid_search.py    # Reciprocal Rank Fusion (RRF) retriever
+│   │       ├── retriever.py        # Unified Search API & deteksi Out-of-Domain (OOD)
+│   │       ├── pipeline.py         # End-to-end ingestion & indexing pipeline
+│   │       ├── experiment_chunking.py # Skrip runner eksperimen variasi chunking
+│   │       ├── run_pipeline.py     # Runner eksekusi penuh pipeline korpus
+│   │       ├── benchmark.py        # Framework evaluasi 6 business queries
+│   │       ├── run_benchmark.py    # Runner kalkulasi metrik benchmark retrieval
+│   └── main.py                 # M1, M2 & M3: Skrip eksekusi terpadu sistem
+├── tests/
+│   ├── test_search.py          # M1: Pengujian State-Space Search (UCS & A*)
+│   ├── test_solver.py          # M2: Pengujian CSP Solver & Validasi QA
+│   └── test_knowledge_base.py  # M3: Pengujian Knowledge Base, ChromaDB, BM25 & OOD
+├── .gitignore
+├── .python-version
+├── LICENSE                     # Lisensi MIT
+├── pyproject.toml              # Konfigurasi dependensi Astral uv
+├── README.md                   # Dokumentasi Lengkap Milestone 1, 2, & 3
+└── uv.lock                     # Lockfile dependensi Astral uv
+```
 
 ---
 
